@@ -6,14 +6,21 @@ class KartingRentalApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Karting Rental")
-        self.root.geometry("900x650")
+        self.root.geometry("1000x700")
+
+        # Configure style
+        self.style = ttk.Style()
+        self.style.theme_use('clam')  # Start with a clean base theme
+
+        # Custom styling
+        self.configure_styles()
 
         # Create menu bar
         self.create_menu()
 
         # Create notebook (tabbed interface)
         self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill=tk.BOTH, expand=True)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Create tabs
         self.create_rental_tab()
@@ -33,13 +40,76 @@ class KartingRentalApp:
         ]
         self.populate_sample_data()
 
+    def configure_styles(self):
+        """Configure custom styles for the application"""
+        # Main colors
+        self.style.configure('.', background='#f0f0f0', foreground='#333333')
+        self.style.configure('TNotebook', background='#f0f0f0', borderwidth=0)
+        self.style.configure('TNotebook.Tab', padding=[15, 5], font=('Helvetica', 10, 'bold'))
+
+        # Frame styles
+        self.style.configure('TFrame', background='#f0f0f0')
+        self.style.configure('Header.TFrame', background='#4a6baf')
+
+        # Label styles
+        self.style.configure('Header.TLabel',
+                             background='#4a6baf',
+                             foreground='white',
+                             font=('Helvetica', 12, 'bold'),
+                             padding=5)
+
+        self.style.configure('Section.TLabel',
+                             background='#f0f0f0',
+                             foreground='#333333',
+                             font=('Helvetica', 10, 'bold'),
+                             padding=5)
+
+        # Button styles
+        self.style.configure('TButton',
+                             font=('Helvetica', 9),
+                             padding=5,
+                             relief='flat')
+
+        self.style.configure('Primary.TButton',
+                             background='#4a6baf',
+                             foreground='white',
+                             font=('Helvetica', 9, 'bold'),
+                             padding=8)
+
+        self.style.map('Primary.TButton',
+                       background=[('active', '#3a5a9f'), ('pressed', '#2a4a8f')])
+
+        # Entry styles
+        self.style.configure('TEntry',
+                             fieldbackground='white',
+                             padding=5,
+                             relief='solid',
+                             bordercolor='#cccccc')
+
+        # Treeview styles
+        self.style.configure('Treeview',
+                             background='white',
+                             foreground='#333333',
+                             fieldbackground='white',
+                             rowheight=25)
+
+        self.style.configure('Treeview.Heading',
+                             background='#4a6baf',
+                             foreground='white',
+                             font=('Helvetica', 9, 'bold'),
+                             padding=5)
+
+        self.style.map('Treeview',
+                       background=[('selected', '#4a6baf')],
+                       foreground=[('selected', 'white')])
+
     def create_menu(self):
         """Create the main menu bar"""
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
 
         # File menu
-        file_menu = tk.Menu(menubar, tearoff=0)
+        file_menu = tk.Menu(menubar, tearoff=0, bg='#f0f0f0', fg='#333333')
         file_menu.add_command(label="New Rental", command=self.new_rental)
         file_menu.add_command(label="Open...", command=self.open_file)
         file_menu.add_separator()
@@ -47,14 +117,14 @@ class KartingRentalApp:
         menubar.add_cascade(label="File", menu=file_menu)
 
         # Edit menu
-        edit_menu = tk.Menu(menubar, tearoff=0)
+        edit_menu = tk.Menu(menubar, tearoff=0, bg='#f0f0f0', fg='#333333')
         edit_menu.add_command(label="Cut", command=self.cut)
         edit_menu.add_command(label="Copy", command=self.copy)
         edit_menu.add_command(label="Paste", command=self.paste)
         menubar.add_cascade(label="Edit", menu=edit_menu)
 
         # Help menu
-        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu = tk.Menu(menubar, tearoff=0, bg='#f0f0f0', fg='#333333')
         help_menu.add_command(label="Help", command=self.show_help)
         help_menu.add_command(label="About", command=self.show_about)
         menubar.add_cascade(label="Help", menu=help_menu)
@@ -73,47 +143,6 @@ class KartingRentalApp:
         self.create_customer_section()
         self.create_messages_section()
 
-    def create_reports_tab(self):
-        """Create the reports tab"""
-        reports_tab = ttk.Frame(self.notebook)
-        self.notebook.add(reports_tab, text="Reports")
-
-        # Add content to reports tab
-        label = ttk.Label(reports_tab, text="Reports will be displayed here")
-        label.pack(pady=50)
-
-        # Add some sample buttons
-        daily_btn = ttk.Button(reports_tab, text="Daily Report", command=lambda: self.generate_report("daily"))
-        daily_btn.pack(pady=5)
-
-        weekly_btn = ttk.Button(reports_tab, text="Weekly Report", command=lambda: self.generate_report("weekly"))
-        weekly_btn.pack(pady=5)
-
-        monthly_btn = ttk.Button(reports_tab, text="Monthly Report", command=lambda: self.generate_report("monthly"))
-        monthly_btn.pack(pady=5)
-
-    def create_settings_tab(self):
-        """Create the settings tab"""
-        settings_tab = ttk.Frame(self.notebook)
-        self.notebook.add(settings_tab, text="Settings")
-
-        # Add content to settings tab
-        label = ttk.Label(settings_tab, text="Application Settings")
-        label.pack(pady=20)
-
-        # Theme selection
-        theme_frame = ttk.LabelFrame(settings_tab, text="Theme", padding="10")
-        theme_frame.pack(pady=10, padx=10, fill=tk.X)
-
-        self.theme_var = tk.StringVar(value="light")
-        ttk.Radiobutton(theme_frame, text="Light", variable=self.theme_var, value="light").pack(anchor=tk.W)
-        ttk.Radiobutton(theme_frame, text="Dark", variable=self.theme_var, value="dark").pack(anchor=tk.W)
-        ttk.Radiobutton(theme_frame, text="System", variable=self.theme_var, value="system").pack(anchor=tk.W)
-
-        # Save settings button
-        save_btn = ttk.Button(settings_tab, text="Save Settings", command=self.save_settings)
-        save_btn.pack(pady=20)
-
     def create_frames(self, parent):
         """
         Creates all the frames displayed in the application
@@ -121,15 +150,15 @@ class KartingRentalApp:
         self.main_frame = ttk.Frame(parent, padding="10")
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # # search
+        # Search frame
         self.top_frame = ttk.Frame(self.main_frame)
-        self.top_frame.pack(fill=tk.X, pady=5)
+        self.top_frame.pack(fill=tk.X, pady=(0, 10))
 
-        # rentals and customer
+        # Left frame (rentals and customer)
         self.left_frame = ttk.Frame(self.main_frame, width=300)
         self.left_frame.pack(side=tk.LEFT, fill=tk.Y, padx=5, pady=5)
 
-        # messages and settings
+        # Right frame (messages)
         self.right_frame = ttk.Frame(self.main_frame)
         self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -137,17 +166,17 @@ class KartingRentalApp:
         """
         Creates section which searches through the rental records
         """
-        search_frame = ttk.LabelFrame(self.top_frame, text="Global Search", padding="10")
+        search_frame = ttk.LabelFrame(self.top_frame, text="Global Search", padding="10", style='Section.TLabel')
         search_frame.pack(fill=tk.X, pady=5)
 
         self.search_var = tk.StringVar()
-        search_entry = ttk.Entry(search_frame, textvariable=self.search_var)
+        search_entry = ttk.Entry(search_frame, textvariable=self.search_var, style='TEntry')
         search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
 
-        search_btn = ttk.Button(search_frame, text="Search", command=self.perform_search)
+        search_btn = ttk.Button(search_frame, text="Search", command=self.perform_search, style='Primary.TButton')
         search_btn.pack(side=tk.LEFT, padx=5)
 
-        clear_btn = ttk.Button(search_frame, text="Clear", command=self.clear_search)
+        clear_btn = ttk.Button(search_frame, text="Clear", command=self.clear_search, style='TButton')
         clear_btn.pack(side=tk.LEFT, padx=5)
 
         # binds enter key to perform the search alongside the search button
@@ -157,45 +186,44 @@ class KartingRentalApp:
         """
         Creates a section with the rental information to submit
         """
-
-        rentals_frame = ttk.LabelFrame(self.left_frame, text="Rentals", padding="10")
+        rentals_frame = ttk.LabelFrame(self.left_frame, text="Rentals", padding="10", style='Section.TLabel')
         rentals_frame.pack(fill=tk.X, pady=5)
 
-        calendar_btn = ttk.Button(rentals_frame, text="Calendar", command=self.show_calendar)
+        calendar_btn = ttk.Button(rentals_frame, text="Calendar", command=self.show_calendar, style='Primary.TButton')
         calendar_btn.pack(fill=tk.X, pady=2)
 
-        ttk.Label(rentals_frame, text="Enter Consumer Name").pack(anchor=tk.W)
-        self.consumer_name_entry = ttk.Entry(rentals_frame)
+        ttk.Label(rentals_frame, text="Enter Consumer Name", background='#f0f0f0').pack(anchor=tk.W)
+        self.consumer_name_entry = ttk.Entry(rentals_frame, style='TEntry')
         self.consumer_name_entry.pack(fill=tk.X, pady=2)
 
-        ttk.Label(rentals_frame, text="End Date").pack(anchor=tk.W)
-        self.end_date_entry = ttk.Entry(rentals_frame)
+        ttk.Label(rentals_frame, text="End Date", background='#f0f0f0').pack(anchor=tk.W)
+        self.end_date_entry = ttk.Entry(rentals_frame, style='TEntry')
         self.end_date_entry.pack(fill=tk.X, pady=2)
 
     def create_customer_section(self):
         """
         Creates a section with the customer information to submit
         """
-        customer_frame = ttk.LabelFrame(self.left_frame, text="Customer", padding="10")
+        customer_frame = ttk.LabelFrame(self.left_frame, text="Customer", padding="10", style='Section.TLabel')
         customer_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(customer_frame, text="Kart ID").pack(anchor=tk.W)
-        self.kart_id_entry = ttk.Entry(customer_frame)
+        ttk.Label(customer_frame, text="Kart ID", background='#f0f0f0').pack(anchor=tk.W)
+        self.kart_id_entry = ttk.Entry(customer_frame, style='TEntry')
         self.kart_id_entry.pack(fill=tk.X, pady=2)
 
-        ttk.Label(customer_frame, text="Start Date").pack(anchor=tk.W)
-        self.start_date_entry = ttk.Entry(customer_frame)
+        ttk.Label(customer_frame, text="Start Date", background='#f0f0f0').pack(anchor=tk.W)
+        self.start_date_entry = ttk.Entry(customer_frame, style='TEntry')
         self.start_date_entry.pack(fill=tk.X, pady=2)
 
-        submit_btn = ttk.Button(customer_frame, text="Submit", command=self.process_rental)
+        submit_btn = ttk.Button(customer_frame, text="Submit", command=self.process_rental, style='Primary.TButton')
         submit_btn.pack(fill=tk.X, pady=5)
 
     def create_messages_section(self):
-        messages_frame = ttk.LabelFrame(self.right_frame, text="Rental Records", padding="10")
+        messages_frame = ttk.LabelFrame(self.right_frame, text="Rental Records", padding="10", style='Section.TLabel')
         messages_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
         # payments button
-        payments_btn = ttk.Button(messages_frame, text="Payments", command=self.show_payments)
+        payments_btn = ttk.Button(messages_frame, text="Payments", command=self.show_payments, style='Primary.TButton')
         payments_btn.pack(fill=tk.X, pady=2)
 
         # treeview for rental records
@@ -209,12 +237,12 @@ class KartingRentalApp:
         self.tree.heading("Paid", text="Paid Amount")
         self.tree.heading("Due", text="Due")
 
-        self.tree.column("Kart ID", width=80)
-        self.tree.column("Date", width=100)
-        self.tree.column("Customer", width=150)
-        self.tree.column("Payable", width=100)
-        self.tree.column("Paid", width=100)
-        self.tree.column("Due", width=100)
+        self.tree.column("Kart ID", width=80, anchor=tk.CENTER)
+        self.tree.column("Date", width=100, anchor=tk.CENTER)
+        self.tree.column("Customer", width=150, anchor=tk.W)
+        self.tree.column("Payable", width=100, anchor=tk.E)
+        self.tree.column("Paid", width=100, anchor=tk.E)
+        self.tree.column("Due", width=100, anchor=tk.E)
 
         self.tree.pack(fill=tk.BOTH, expand=True, pady=5)
 
@@ -285,17 +313,17 @@ class KartingRentalApp:
         self.end_date_entry.delete(0, tk.END)
 
     def show_payments(self):
-        messagebox.showinfo("Payments", "payment details would be displayed here")
+        messagebox.showinfo("Payments", "Payment details would be displayed here")
 
     def show_help(self):
         help_text = """Karting Rental System Help
-            1. Enter rental details in the Customer section
-            2. View rental history in the Messages section
-            3. Use Calendar to check availability
-            4. Use Global Search to find specific rentals
-               - Searches across all fields (Kart ID, Date, Customer, etc.)
-               - Press Enter or click Search to perform search
-               - Click Clear to show all records"""
+1. Enter rental details in the Customer section
+2. View rental history in the Messages section
+3. Use Calendar to check availability
+4. Use Global Search to find specific rentals
+   - Searches across all fields (Kart ID, Date, Customer, etc.)
+   - Press Enter or click Search to perform search
+   - Click Clear to show all records"""
         messagebox.showinfo("Help", help_text)
 
     def show_about(self):
@@ -327,6 +355,47 @@ Version 1.0
     def paste(self):
         """Placeholder for paste functionality"""
         messagebox.showinfo("Paste", "This would paste text in a real implementation")
+
+    def create_reports_tab(self):
+        """Create the reports tab"""
+        reports_tab = ttk.Frame(self.notebook)
+        self.notebook.add(reports_tab, text="Reports")
+
+        # Add content to reports tab
+        label = ttk.Label(reports_tab, text="Reports will be displayed here", font=('Helvetica', 12))
+        label.pack(pady=50)
+
+        # Add some sample buttons
+        daily_btn = ttk.Button(reports_tab, text="Daily Report", command=lambda: self.generate_report("daily"), style='Primary.TButton')
+        daily_btn.pack(pady=5, padx=50, fill=tk.X)
+
+        weekly_btn = ttk.Button(reports_tab, text="Weekly Report", command=lambda: self.generate_report("weekly"), style='Primary.TButton')
+        weekly_btn.pack(pady=5, padx=50, fill=tk.X)
+
+        monthly_btn = ttk.Button(reports_tab, text="Monthly Report", command=lambda: self.generate_report("monthly"), style='Primary.TButton')
+        monthly_btn.pack(pady=5, padx=50, fill=tk.X)
+
+    def create_settings_tab(self):
+        """Create the settings tab"""
+        settings_tab = ttk.Frame(self.notebook)
+        self.notebook.add(settings_tab, text="Settings")
+
+        # Add content to settings tab
+        label = ttk.Label(settings_tab, text="Application Settings", font=('Helvetica', 12))
+        label.pack(pady=20)
+
+        # Theme selection
+        theme_frame = ttk.LabelFrame(settings_tab, text="Theme", padding="10", style='Section.TLabel')
+        theme_frame.pack(pady=10, padx=50, fill=tk.X)
+
+        self.theme_var = tk.StringVar(value="light")
+        ttk.Radiobutton(theme_frame, text="Light", variable=self.theme_var, value="light").pack(anchor=tk.W, pady=2)
+        ttk.Radiobutton(theme_frame, text="Dark", variable=self.theme_var, value="dark").pack(anchor=tk.W, pady=2)
+        ttk.Radiobutton(theme_frame, text="System", variable=self.theme_var, value="system").pack(anchor=tk.W, pady=2)
+
+        # Save settings button
+        save_btn = ttk.Button(settings_tab, text="Save Settings", command=self.save_settings, style='Primary.TButton')
+        save_btn.pack(pady=20, padx=50, fill=tk.X)
 
     def generate_report(self, report_type):
         """Generate different types of reports"""

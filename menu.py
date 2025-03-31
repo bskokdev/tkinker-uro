@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, scrolledtext
 
 
 class MainMenu:
@@ -52,7 +52,23 @@ class MainMenu:
         messagebox.showinfo("Paste", "This would paste text in a real implementation")
 
     def show_about(self):
-        about_text = """Karting Rental System
-Version 1.0
-© 2023 Karting Rental Company"""
-        messagebox.showinfo("About", about_text)
+        about_text = """Simple CRUD application which allows karting rentals to track the karts, and their customers
+        
+How to Use This Application:
+- Add new rentals by filling in all fields
+- Use the Search box to filter existing rentals
+- Generate reports with one click on the reports tab
+- Switch between Light and Dark themes
+
+Boris Skok
+LOGIN: SKO0219
+"""
+        about_window = tk.Toplevel(self.root)
+        about_window.title("About")
+
+        st = scrolledtext.ScrolledText(about_window, wrap=tk.WORD, width=60, height=20)
+        st.insert(tk.INSERT, about_text)
+        st.config(state=tk.DISABLED)
+        st.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        about_window.minsize(500, 400)

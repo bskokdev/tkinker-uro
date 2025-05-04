@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karting Rental System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #4a6baf;
+            --secondary-color: #6c757d;
+            --light-bg: #f8f9fa;
+            --dark-bg: #212529;
+            --dark-text: #212529;
+            --light-text: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            height: calc(100vh - 56px);
+            background-color: var(--light-bg);
+            border-right: 1px solid #dee2e6;
+        }
+
+        .main-content {
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+        }
+
+        .theme-light {
+            background-color: white;
+            color: var(--dark-text);
+        }
+
+        .theme-dark {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+        }
+
+        .theme-dark .card,
+        .theme-dark .sidebar,
+        .theme-dark .table {
+            background-color: #343a40;
+            color: var(--light-text);
+        }
+
+        .theme-dark .table th {
+            background-color: #495057;
+        }
+
+        .rental-card {
+            transition: all 0.3s ease;
+        }
+
+        .rental-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        #rentalTable tbody tr:hover {
+            background-color: rgba(74, 107, 175, 0.1);
+            cursor: pointer;
+        }
+
+        .theme-dark #rentalTable tbody tr:hover {
+            background-color: rgba(74, 107, 175, 0.3);
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-speedometer2 me-2"></i>Karting Rental
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-bs-toggle="tab" data-bs-target="#rentals-tab">
+                            <i class="bi bi-cart-plus me-1"></i>Rentals
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#reports-tab">
+                            <i class="bi bi-graph-up me-1"></i>Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#settings-tab">
+                            <i class="bi bi-gear me-1"></i>Settings
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="themeDropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-palette"></i> Theme
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item theme-selector" href="#" data-theme="light">Light</a></li>
+                            <li><a class="dropdown-item theme-selector" href="#" data-theme="dark">Dark</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                        <i class="bi bi-info-circle"></i> About
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar p-0">
+                <div class="tab-content">
+                    <!-- Rentals Sidebar -->
+                    <div class="tab-pane fade show active" id="rentals-tab">
+                        <div class="p-3">
+                            <h5 class="mb-3">New Rental</h5>
+                            <form id="rentalForm">
+                                <div class="mb-3">
+                                    <label for="consumerName" class="form-label">Consumer Name</label>
+                                    <input type="text" class="form-control" id="consumerName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="kartId" class="form-label">Kart ID</label>
+                                    <input type="text" class="form-control" id="kartId" required>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <label for="startDate" class="form-label">Start Date</label>
+                                        <input type="date" class="form-control" id="startDate" required>
+                                    </div>
+                                    <div class="col">
+                                        <label for="endDate" class="form-label">End Date</label>
+                                        <input type="date" class="form-control" id="endDate" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-check-circle me-1"></i>Submit Rental
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Reports Sidebar -->
+                    <div class="tab-pane fade" id="reports-tab">
+                        <div class="p-3">
+                            <h5 class="mb-3">Generate Report</h5>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary report-btn" data-report-type="daily">
+                                    <i class="bi bi-calendar-day me-1"></i>Daily Report
+                                </button>
+                                <button class="btn btn-outline-primary report-btn" data-report-type="weekly">
+                                    <i class="bi bi-calendar-week me-1"></i>Weekly Report
+                                </button>
+                                <button class="btn btn-outline-primary report-btn" data-report-type="monthly">
+                                    <i class="bi bi-calendar-month me-1"></i>Monthly Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Sidebar -->
+                    <div class="tab-pane fade" id="settings-tab">
+                        <div class="p-3">
+                            <h5 class="mb-3">Application Settings</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Theme</label>
+                                <div class="form-check">
+                                    <input class="form-check-input theme-radio" type="radio" name="theme" id="lightTheme" value="light" checked>
+                                    <label class="form-check-label" for="lightTheme">Light Theme</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input theme-radio" type="radio" name="theme" id="darkTheme" value="dark">
+                                    <label class="form-check-label" for="darkTheme">Dark Theme</label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100" id="saveSettings">
+                                <i class="bi bi-save me-1"></i>Save Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="col-md-9 col-lg-10 ms-sm-auto main-content p-4">
+                <div class="tab-content">
+                    <!-- Rentals Main Content -->
+                    <div class="tab-pane fade show active" id="rentals-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="bi bi-cart-plus me-2"></i>Rental Management</h2>
+                            <div class="input-group" style="max-width: 400px;">
+                                <input type="text" class="form-control" id="rentalSearch" placeholder="Search rentals...">
+                                <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="rentalTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Kart ID</th>
+                                                <th>Date</th>
+                                                <th>Customer</th>
+                                                <th>Payable</th>
+                                                <th>Paid</th>
+                                                <th>Due</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Sample data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Main Content -->
+                    <div class="tab-pane fade" id="reports-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="bi bi-graph-up me-2"></i>Reports</h2>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary" id="exportPdf">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+                                </button>
+                                <button class="btn btn-outline-success" id="exportExcel">
+                                    <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">Rental Statistics</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="rentalChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">Revenue Overview</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="revenueChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Detailed Report Data</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table" id="reportTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Period</th>
+                                                <th>Total Rentals</th>
+                                                <th>Total Revenue</th>
+                                                <th>Avg. Rental Duration</th>
+                                                <th>Most Rented Kart</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Report data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Main Content -->
+                    <div class="tab-pane fade" id="settings-content">
+                        <h2 class="mb-4"><i class="bi bi-gear me-2"></i>Application Settings</h2>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">General Settings</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="settingsForm">
+                                            <div class="mb-3">
+                                                <label for="companyName" class="form-label">Company Name</label>
+                                                <input type="text" class="form-control" id="companyName" value="Karting Rental Co.">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="currency" class="form-label">Currency</label>
+                                                <select class="form-select" id="currency">
+                                                    <option value="$">Dollar ($)</option>
+                                                    <option value="€">Euro (€)</option>
+                                                    <option value="£">Pound (£)</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Date Format</label>
+                                                <select class="form-select" id="dateFormat">
+                                                    <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                                    <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                                                    <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                                                </select>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">User Preferences</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Default View</label>
+                                            <select class="form-select" id="defaultView">
+                                                <option value="rentals">Rentals</option>
+                                                <option value="reports">Reports</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Items Per Page</label>
+                                            <input type="number" class="form-control" id="itemsPerPage" min="5" max="100" value="10">
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="notifications" checked>
+                                            <label class="form-check-label" for="notifications">Enable Notifications</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">System Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Version:</strong> 1.0.0</p>
+                                        <p><strong>Last Updated:</strong> June 15, 2023</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Database:</strong> SQLite 3.38.5</p>
+                                        <p><strong>Browser:</strong> <span id="browserInfo"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="aboutModalLabel">About Karting Rental System</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Application Information</h5>
+                            <p>Version: 1.0.0</p>
+                            <p>© 2023 Karting Rental Company</p>
+                            <hr>
+                            <h5>How to Use</h5>
+                            <ul>
+                                <li>Add new rentals by filling in all fields</li>
+                                <li>Use the Search box to filter existing rentals</li>
+                                <li>Generate reports with one click</li>
+                                <li>Switch between Light and Dark themes</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Developer Information</h5>
+                            <p><strong>Name:</strong> Boris Skok</p>
+                            <p><strong>Login:</strong> SKO0219</p>
+                            <hr>
+                            <h5>Contact Support</h5>
+                            <p><i class="bi bi-envelope me-2"></i>support@kartingrental.com</p>
+                            <p><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Generated Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Report Generated</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="reportMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        // Sample data for the application
+        const sampleData = [
+            { kartId: "#A1GA68", date: "23/09/2022", customer: "Jacob Marcus", payable: "$100", paid: "$000", due: "$000" },
+            { kartId: "#A1GA68", date: "23/09/2022", customer: "Jacob Marcus", payable: "$100", paid: "$000", due: "$000" },
+            { kartId: "#A1GA68", date: "23/09/2022", customer: "Jacob Marcus", payable: "$100", paid: "$000", due: "$000" },
+            { kartId: "#B2GB79", date: "24/09/2022", customer: "Sarah Johnson", payable: "$120", paid: "$050", due: "$070" },
+            { kartId: "#C3HC80", date: "25/09/2022", customer: "Michael Brown", payable: "$150", paid: "$150", due: "$000" },
+            { kartId: "#D4HD91", date: "26/09/2022", customer: "Emily Davis", payable: "$90", paid: "$90", due: "$000" },
+            { kartId: "#E5HE02", date: "27/09/2022", customer: "David Wilson", payable: "$200", paid: "$100", due: "$100" },
+            { kartId: "#F6HF13", date: "28/09/2022", customer: "Jessica Taylor", payable: "$110", paid: "$110", due: "$000" }
+        ];
+
+        // Report data
+        const reportData = {
+            daily: { rentals: 8, revenue: "$970", avgDuration: "2.5 hours", popularKart: "#A1GA68 (3 rentals)" },
+            weekly: { rentals: 42, revenue: "$5,250", avgDuration: "2.8 hours", popularKart: "#B2GB79 (12 rentals)" },
+            monthly: { rentals: 180, revenue: "$22,500", avgDuration: "3.1 hours", popularKart: "#C3HC80 (45 rentals)" }
+        };
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load sample data into the rentals table
+            loadRentalData();
+
+            // Initialize charts
+            initCharts();
+
+            // Set up event listeners
+            setupEventListeners();
+
+            // Detect browser info
+            document.getElementById('browserInfo').textContent = detectBrowser();
+        });
+
+        function loadRentalData(data = sampleData) {
+            const tbody = document.querySelector('#rentalTable tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.kartId}</td>
+                    <td>${item.date}</td>
+                    <td>${item.customer}</td>
+                    <td>${item.payable}</td>
+                    <td>${item.paid}</td>
+                    <td>${item.due}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${item.kartId}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.kartId}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function initCharts() {
+            // Rental Chart
+            const rentalCtx = document.getElementById('rentalChart').getContext('2d');
+            new Chart(rentalCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Rentals',
+                        data: [12, 19, 15, 17, 25, 22, 30],
+                        backgroundColor: 'rgba(74, 107, 175, 0.7)',
+                        borderColor: 'rgba(74, 107, 175, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [12500, 11800, 14200, 15600, 17200, 18500],
+                        fill: false,
+                        backgroundColor: 'rgba(74, 107, 175, 0.7)',
+                        borderColor: 'rgba(74, 107, 175, 1)',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            // Theme switcher
+            document.querySelectorAll('.theme-selector, .theme-radio').forEach(el => {
+                el.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme') || this.value;
+                    document.body.className = `theme-${theme}`;
+                });
+            });
+
+            // Save settings
+            document.getElementById('saveSettings').addEventListener('click', function() {
+                alert('Settings saved successfully!');
+            });
+
+            // Rental form submission
+            document.getElementById('rentalForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const consumerName = document.getElementById('consumerName').value;
+                const kartId = document.getElementById('kartId').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                if (!consumerName || !kartId || !startDate || !endDate) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                // Format date for display
+                const formattedDate = new Date(startDate).toLocaleDateString('en-GB');
+
+                // Add new rental to the table
+                const newRental = {
+                    kartId: kartId,
+                    date: formattedDate,
+                    customer: consumerName,
+                    payable: "$100",
+                    paid: "$000",
+                    due: "$100"
+                };
+
+                sampleData.unshift(newRental);
+                loadRentalData();
+
+                // Reset form
+                this.reset();
+
+                alert(`Rental processed for ${consumerName}\nKart: ${kartId}\nDates: ${startDate} to ${endDate}`);
+            });
+
+            // Search functionality
+            document.getElementById('rentalSearch').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                if (!searchTerm) {
+                    loadRentalData();
+                    return;
+                }
+
+                const filteredData = sampleData.filter(item =>
+                    item.kartId.toLowerCase().includes(searchTerm) ||
+                    item.customer.toLowerCase().includes(searchTerm) ||
+                    item.date.includes(searchTerm)
+                );
+
+                loadRentalData(filteredData);
+            });
+
+            // Clear search
+            document.getElementById('clearSearch').addEventListener('click', function() {
+                document.getElementById('rentalSearch').value = '';
+                loadRentalData();
+            });
+
+            // Report buttons
+            document.querySelectorAll('.report-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const reportType = this.getAttribute('data-report-type');
+                    generateReport(reportType);
+                });
+            });
+
+            // Tab switching
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const target = this.getAttribute('data-bs-target');
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.remove('show', 'active');
+                    });
+                    document.querySelector(target).classList.add('show', 'active');
+                });
+            });
+        }
+
+        function generateReport(type) {
+            const report = reportData[type];
+            const reportTable = document.querySelector('#reportTable tbody');
+            reportTable.innerHTML = `
+                <tr>
+                    <td>${type.charAt(0).toUpperCase() + type.slice(1)}</td>
+                    <td>${report.rentals}</td>
+                    <td>${report.revenue}</td>
+                    <td>${report.avgDuration}</td>
+                    <td>${report.popularKart}</td>
+                </tr>
+            `;
+
+            document.getElementById('reportMessage').textContent =
+                `${type.charAt(0).toUpperCase() + type.slice(1)} report has been generated with ${report.rentals} rentals totaling ${report.revenue} in revenue.`;
+
+            // Show the report modal
+            const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+            reportModal.show();
+
+            // Switch to reports tab
+            document.querySelector('[data-bs-target="#reports-tab"]').click();
+            document.querySelector('[data-bs-target="#reports-content"]').click();
+        }
+
+        function detectBrowser() {
+            const userAgent = navigator.userAgent;
+            let browserName;
+
+            if (userAgent.match(/chrome|chromium|crios/i)) {
+                browserName = "Chrome";
+            } else if (userAgent.match(/firefox|fxios/i)) {
+                browserName = "Firefox";
+            } else if (userAgent.match(/safari/i)) {
+                browserName = "Safari";
+            } else if (userAgent.match(/opr\//i)) {
+                browserName = "Opera";
+            } else if (userAgent.match(/edg/i)) {
+                browserName = "Edge";
+            } else {
+                browserName = "Unknown";
+            }
+
+            return browserName;
+        }
+    </script>
+</body>
+</html>
